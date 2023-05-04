@@ -1,0 +1,22 @@
+{
+  "name": "slackgptjs2",
+  "version": "1.0.0",
+  "description": "SlackGPT2",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/drevello/slackgptjs2.git"
+  },
+  "author": "Danilo Orrego",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/drevello/slackgptjs2/issues"
+  },
+  "homepage": "https://github.com/drevello/slackgptjs2#readme",
+  "dependencies": {
+    "openai": "^3.2.1"
+  }
+}
