@@ -1,13 +1,15 @@
-const { App, LogLevel } = require('@slack/bolt');
+const { App, LogLevel, ExpressReceiver } = require('@slack/bolt');
 const { askAnything, whichAction } = require('./controllers/openai.js');
 require('dotenv').config();
 
-console.log(askAnything)
+const expressReceiver = new ExpressReceiver({
+  signingSecret: process.env.SLACK_SIGNING_SECRET,
+});
 
 const app = new App({
   logLevel: LogLevel.DEBUG,
-  signingSecret: process.env.SLACK_SIGNING_SECRET,
-  token: process.env.SLACK_BOT_TOKEN
+  token: process.env.SLACK_BOT_TOKEN,
+  receiver: expressReceiver,
 });
 
 app.message(async ({ message, say }) => {
@@ -26,9 +28,10 @@ app.error(error => {
   console.error(error);
 });
 
-(async () => {
-  // Start your app
-  await app.start(process.env.PORT || 3000);
+// Add these lines at the end of your app.js
+const port = process.env.PORT || 3000;
+expressReceiver.app.listen(port, () => {
+  console.log(`⚡️ Slack app is running on port ${port}!`);
+});
 
-  console.log('⚡️ Slack app is running!');
-})();
+module.exports = app;
