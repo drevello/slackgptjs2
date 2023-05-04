@@ -17,17 +17,7 @@ console.log('Starting the app...');
 
 app.message(async ({ message, say }) => {
   console.log("Received message: ", message);
-  const action = await whichAction(message.text);
-  console.log("Action: ", action);
-
-  if (action.trim() === 'Ask Anything') {
-    const result = await askAnything(message.text);
-    console.log("Result: ", result);
-    await say(result);
-  } else {
-    console.log("Default message");
-    await say(`I am here to answer your questions. Please ask me anything.`);
-  }
+  await say('HOLAAAA');
 });
 
 app.error(error => {
