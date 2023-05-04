@@ -14,7 +14,7 @@ let conversationHistory = [];
 const getContent = "https://bombora-partners.atlassian.net/wiki/rest/api/content/{}?expand=body.storage";
 const getPages = "https://bombora-partners.atlassian.net/wiki/rest/api/content/search?cql={}";
 
-const temperature =  0.3;
+const temperature =  0.2;
 
 const headers = {
   "Content-Type": "application/json",
@@ -76,13 +76,11 @@ const app = new App({
 });
 
 // Log when the app is starting
-console.log('Starting the app...');
 
 app.message(async ({ message, say }) => {
-  console.log("Received message: ", message);
+  say('<@${message.user}> Give me just one second...')
   let response = '';
   try {
-    console.log('question:');
     const q = message.text;
 
     conversationHistory.push({ role: "user", content: cqlPrompt.replace('{0}', q).replace('{1}', '') });
@@ -95,12 +93,9 @@ app.message(async ({ message, say }) => {
     });
     const cqlQuery = cqlQueryResponse.data.choices[0].message.content.trim();
     conversationHistory.push(cqlQueryResponse.data.choices[0].message);
-    console.log(cqlQuery)
     let responsePages = await axios.get(getPages.replace('{}', cqlQuery), { headers });
 
-    console.log(responsePages.data.results)
     if (!responsePages.data.results.length) {
-      console.log('adentro')
       conversationHistory.pop();
       conversationHistory.pop();
       conversationHistory.push({ role: "user", content: cqlPrompt.replace('{0}', q).replace('{1}', `Consider the following "${cqlQuery}" FAILED so it has to be more concise. Remove any programming language from the CQL like(nodejs, python, C#, java, ruby)`) });
@@ -112,11 +107,9 @@ app.message(async ({ message, say }) => {
       });
 
       const cqlQueryRetry = cqlQueryResponseRetry.data.choices[0].message.content.trim();
-      console.log(cqlQueryRetry)
       conversationHistory.push(cqlQueryResponseRetry.data.choices[0].message);
 
       responsePages = await axios.get(getPages.replace('{}', cqlQueryRetry), { headers });
-      console.log(responsePages)
 
     }
     conversationHistory.push({ role: "user", content: choosePage.replace('{0}', JSON.stringify(responsePages.data.results, null, 4)).replace('{1}', q) });
@@ -127,24 +120,20 @@ app.message(async ({ message, say }) => {
       temperature,
     });
     const pageId = pageIdResponse.data.choices[0].message.content.trim();
-    console.log(getContent.replace('{}', pageId))
     conversationHistory.push(pageIdResponse.data.choices[0].message);
     const responsePage = await axios.get(getContent.replace('{}', pageId), { headers });
-    console.log(responsePrompt.replace('{0}', q).replace('{1}', responsePage.data.body.storage.value))
     try {
+      conversationHistory = [];
       conversationHistory.push({ role: "user", content: responsePrompt.replace('{0}', q).replace('{1}', responsePage.data.body.storage.value) });
-      console.log('asdacacsacas')
       response = await openai.createChatCompletion({
         model: "gpt-3.5-turbo-0301",
         messages: conversationHistory,
         max_tokens: 500,
         temperature,
       });
-      console.log('asdacacsacas2')
 
       conversationHistory.push(response.data.choices[0].message);
     } catch (e) {
-      console.log(e.response)
       conversationHistory.pop();
       conversationHistory.push({ role: "user", content: `Reply to the user that they can find the answer to their question in the follow documentation link https://bombora-partners.atlassian.net/wiki/spaces/DOC/pages/${pageId}` });
 
@@ -158,6 +147,7 @@ app.message(async ({ message, say }) => {
 
     // Reset the conversation history
   } catch (error) {
+    conversationHistory = [];
     response = await openai.createChatCompletion({
       model: "gpt-3.5-turbo-0301",
       messages: [{ role: "user", content: `Reply to the user that they can find the answer to their question in the follow documentation link https://bombora-partners.atlassian.net/wiki/spaces/DOC/pages/524307/API+Documentation` }],
@@ -166,7 +156,6 @@ app.message(async ({ message, say }) => {
     });
   }
   conversationHistory.push(response.data.choices[0].message);
-  console.log(response.data.choices[0].message.content)
   say(response.data.choices[0].message.content)
   // Reset the conversation history
   conversationHistory = [];
