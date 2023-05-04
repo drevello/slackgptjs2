@@ -138,7 +138,7 @@ app.message(async ({ message, say }) => {
     const responsePage = await axios.get(getContent.replace('{}', pageId), { headers });
     try {
       conversationHistory = [];
-      conversationHistory.push({ role: "user", content: truncateToTokens(responsePrompt.replace('{0}', q).replace('{1}', responsePage.data.body.storage.value), maxTokensResponse) });
+      conversationHistory.push({ role: "user", content: responsePrompt.replace('{0}', q).replace('{1}', responsePage.data.body.storage.value) });
       response = await openai.createChatCompletion({
         model: "gpt-3.5-turbo-0301",
         messages: conversationHistory,
@@ -149,7 +149,7 @@ app.message(async ({ message, say }) => {
       conversationHistory.push(response.data.choices[0].message);
     } catch (e) {
       conversationHistory.pop();
-      conversationHistory.push({ role: "user", content: truncateToTokens(`Reply to <@${message.user}> that his question '${q}', can find an answer in the following documentation link https://bombora-partners.atlassian.net/wiki/spaces/DOC/pages/${pageId}`, maxTokensResponse) });
+      conversationHistory.push({ role: "user", content: `Reply to <@${message.user}> that his question '${q}', can find an answer in the following documentation link https://bombora-partners.atlassian.net/wiki/spaces/DOC/pages/${pageId}` });
       response = await openai.createChatCompletion({
         model: "gpt-3.5-turbo-0301",
         messages: conversationHistory,
@@ -163,7 +163,7 @@ app.message(async ({ message, say }) => {
     conversationHistory = [];
     response = await openai.createChatCompletion({
       model: "gpt-3.5-turbo-0301",
-      messages: [{ role: "user", content: truncateToTokens(`Reply to <@${message.user}> that his question '${q}', can find an answer in the following documentation link https://bombora-partners.atlassian.net/wiki/spaces/DOC/pages/524307/API+Documentation`, maxTokensResponse) }],
+      messages: [{ role: "user", content: `Reply to <@${message.user}> that his question '${q}', can find an answer in the following documentation link https://bombora-partners.atlassian.net/wiki/spaces/DOC/pages/524307/API+Documentation` }],
       max_tokens: 500,
       temperature,
     });
