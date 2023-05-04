@@ -170,7 +170,7 @@ app.message(async ({ message, say }) => {
     });
   }
   conversationHistory.push(response.data.choices[0].message);
-  say(response.data.choices[0].message.content)
+  say(response.data.choices[0].message.content.replace('[Your Name]', ''))
   // Reset the conversation history
   conversationHistory = [];
 });
