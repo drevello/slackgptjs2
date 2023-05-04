@@ -1,9 +1,21 @@
 const { App, LogLevel, ExpressReceiver } = require('@slack/bolt');
 const { Configuration, OpenAIApi } = require("openai");
 const axios = require('axios');
+const tokenizer = require('tokenizer');
+
+function truncateToTokens(text, maxTokens) {
+    const tokens = tokenizer.tokenize(text);
+
+    if (tokens.length <= maxTokens) {
+        return text;
+    }
+
+    return tokens.slice(0, maxTokens).join(' ');
+}
 
 require('dotenv').config();
 
+const maxTokensResponse = 4040
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
 });
@@ -124,7 +136,7 @@ app.message(async ({ message, say }) => {
     const responsePage = await axios.get(getContent.replace('{}', pageId), { headers });
     try {
       conversationHistory = [];
-      conversationHistory.push({ role: "user", content: responsePrompt.replace('{0}', q).replace('{1}', responsePage.data.body.storage.value) });
+      conversationHistory.push({ role: "user", content: truncateToTokens(responsePrompt.replace('{0}', q).replace('{1}', responsePage.data.body.storage.value), maxTokensResponse) });
       response = await openai.createChatCompletion({
         model: "gpt-3.5-turbo-0301",
         messages: conversationHistory,
@@ -135,8 +147,7 @@ app.message(async ({ message, say }) => {
       conversationHistory.push(response.data.choices[0].message);
     } catch (e) {
       conversationHistory.pop();
-      conversationHistory.push({ role: "user", content: `Reply to the user that they can find the answer to their question in the follow documentation link https://bombora-partners.atlassian.net/wiki/spaces/DOC/pages/${pageId}` });
-
+      conversationHistory.push({ role: "user", content: truncateToTokens(`Reply to <@${message.user}> that his question '${q}', can find an answer in the following documentation link https://bombora-partners.atlassian.net/wiki/spaces/DOC/pages/${pageId}`, maxTokensResponse) });
       response = await openai.createChatCompletion({
         model: "gpt-3.5-turbo-0301",
         messages: conversationHistory,
@@ -150,7 +161,7 @@ app.message(async ({ message, say }) => {
     conversationHistory = [];
     response = await openai.createChatCompletion({
       model: "gpt-3.5-turbo-0301",
-      messages: [{ role: "user", content: `Reply to the user that they can find the answer to their question in the follow documentation link https://bombora-partners.atlassian.net/wiki/spaces/DOC/pages/524307/API+Documentation` }],
+      messages: [{ role: "user", content: truncateToTokens(`Reply to <@${message.user}> that his question '${q}', can find an answer in the following documentation link https://bombora-partners.atlassian.net/wiki/spaces/DOC/pages/524307/API+Documentation`, maxTokensResponse) }],
       max_tokens: 500,
       temperature,
     });
