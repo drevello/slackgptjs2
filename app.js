@@ -13,6 +13,7 @@ const app = new App({
 });
 
 app.message(async ({ message, say }) => {
+  console.log("Received message: ", message);
   const action = await whichAction(message.text);
   console.log(action);
 
