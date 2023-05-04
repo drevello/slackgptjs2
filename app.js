@@ -149,7 +149,7 @@ app.message(async ({ message, say }) => {
       conversationHistory.push(response.data.choices[0].message);
     } catch (e) {
       conversationHistory.pop();
-      conversationHistory.push({ role: "user", content: `Reply to <@${message.user}> that his question '${q}', can find an answer in the following documentation link https://bombora-partners.atlassian.net/wiki/spaces/DOC/pages/${pageId}` });
+      conversationHistory.push({ role: "user", content: `As a customer service representative, reply to the user that they can find the answer to their question in the follow documentation link https://bombora-partners.atlassian.net/wiki/spaces/DOC/pages/${pageId}, you just need to provide the url address wrapped in a nice response.` });
       response = await openai.createChatCompletion({
         model: "gpt-3.5-turbo-0301",
         messages: conversationHistory,
@@ -163,7 +163,7 @@ app.message(async ({ message, say }) => {
     conversationHistory = [];
     response = await openai.createChatCompletion({
       model: "gpt-3.5-turbo-0301",
-      messages: [{ role: "user", content: `Reply to <@${message.user}> that his question '${q}', can find an answer in the following documentation link https://bombora-partners.atlassian.net/wiki/spaces/DOC/pages/524307/API+Documentation` }],
+      messages: [{ role: "user", content: `As a customer service representative, reply to the user that they can find the answer to their question in the follow documentation link https://bombora-partners.atlassian.net/wiki/spaces/DOC/pages/524307/API+Documentation, you just need to provide the url address wrapped in a nice response.` }],
       max_tokens: 500,
       temperature,
     });
