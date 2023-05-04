@@ -1,7 +1,9 @@
 const { App, LogLevel, ExpressReceiver } = require('@slack/bolt');
 const { Configuration, OpenAIApi } = require("openai");
 const axios = require('axios');
-const tokenizer = require('tokenizer');
+const natural = require('natural');
+const tokenizer = new natural.WordTokenizer();
+
 
 function truncateToTokens(text, maxTokens) {
     const tokens = tokenizer.tokenize(text);
