@@ -92,8 +92,8 @@ const app = new App({
 app.message(async ({ message, say }) => {
   say(`<@${message.user}> Give me just one second...`)
   let response = '';
+  const q = message.text;
   try {
-    const q = message.text;
 
     conversationHistory.push({ role: "user", content: cqlPrompt.replace('{0}', q).replace('{1}', '') });
 
