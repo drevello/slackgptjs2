@@ -78,7 +78,7 @@ const app = new App({
 // Log when the app is starting
 
 app.message(async ({ message, say }) => {
-  say('<@${message.user}> Give me just one second...')
+  say(`<@${message.user}> Give me just one second...`)
   let response = '';
   try {
     const q = message.text;
