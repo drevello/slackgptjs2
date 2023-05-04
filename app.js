@@ -1,5 +1,6 @@
 const { App, LogLevel } = require('@slack/bolt');
 const { askAnything, whichAction } = require('./controllers/openai.js');
+require('dotenv').config();
 
 console.log(askAnything)
 
@@ -9,9 +10,9 @@ const app = new App({
   token: process.env.SLACK_BOT_TOKEN
 });
 
-app.message( async ({ message, say }) => {
+app.message(async ({ message, say }) => {
   const action = await whichAction(message.text);
-  console.log(action)
+  console.log(action);
 
   if (action.trim() === 'Ask Anything') {
     const result = await askAnything(message.text);
@@ -21,6 +22,13 @@ app.message( async ({ message, say }) => {
   }
 });
 
-app.error( error => { console.error(error); });
+app.error(error => {
+  console.error(error);
+});
 
-module.exports = app;
+(async () => {
+  // Start your app
+  await app.start(process.env.PORT || 3000);
+
+  console.log('⚡️ Slack app is running!');
+})();
